@@ -24,6 +24,7 @@ def GibbsSampler(nchain, initialisation, data, param) :
      #mise à jour de Beta2
     
     
+     #mise à jour de b_i
     
     
      #mise à jour de sigma
