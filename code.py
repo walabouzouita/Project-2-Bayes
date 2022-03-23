@@ -1,7 +1,7 @@
 import numpy as np
 import numpy.random as rd
 import matplotlib.pyplot as plt
-
+from math import exp,log
 
 K= 120
 r1= np.array([3, 5, 2, 7, 7, 2, 5, 3, 5, 11, 6, 6, 11, 4, 4, 2, 8, 8, 6, 
@@ -45,14 +45,26 @@ def GibbsSampler(nchain, initialisation, data, param) :
     #chain[i,] = [alpha, beta1, beta2, sigma]
     
     #initialisation
-    chain = np.zeros((nchain + 1, 4))
+    chain = np.zeros((nchain + 1, 244))
     chain[0,:] = initialisation
     
     
     for i in range(nchain):
       
      #mise à jour de alpha
-    
+        alpha_prop=chain[i,0]+np.random.normal()
+        
+        psi_old=chain[i,0]+chain[i,1]*year+chain[i,2]*(year**2-22)+chain[4:124]
+        psi_prop=alpha_prop+chain[i,1]*year+chain[i,2]*(year**2-22)+chain[4:124]
+        
+        p1_old=exp(chain[124:244]+log(psi_old))/(1+exp(chain[124:244]+log(psi_old)))
+        p1_prop=exp(chain[124:244]+log(psi_prop))/(1+exp(chain[124:244]+log(psi_prop)))
+        
+        top=-alpha_prop**2/(2*10**-6)+np.sum(r1*p1_prop+(n1-r1)*(1-p1_prop))
+        bottom=-chain[i,0]**2/(2*10**-6)+np.sum(r1*p1_old+(n1-r1)*(1-p1_old))
+        
+        if np.random.uniform()<exp(top-bottom):
+            chain[i+1,0]=alpha_prop
     
     
      #mise à jour de Beta1
