@@ -41,43 +41,41 @@ year= np.array([-10, -9, -9, -8, -8, -8, -7, -7, -7, -7, -6, -6, -6, -6, -6,
 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 6, 6, 
 6, 6, 6, 7, 7, 7, 7, 8, 8, 8, 9, 9, 10])
 
-def GibbsSampler(nchain, initialisation, data, param) :
-    #chain[i,] = [alpha, beta1, beta2, sigma]
-    
+def GibbsSampler(nchain, initialisation) :
+
     #initialisation
     chain = np.zeros((nchain + 1, 244))
     chain[0,:] = initialisation
-    
-    
+
+
     for i in range(nchain):
-        
+
         chain[i+1]=chain[i]
-        
+
      #mise à jour de alpha
-        alpha_prop=chain[i+1,0]+np.random.normal()
-        
-        psi_old=chain[i+1,0]+chain[i+1,1]*year+chain[i+1,2]*(year**2-22)+chain[i+1,4:124]
-        psi_prop=alpha_prop+chain[i+1,1]*year+chain[i+1,2]*(year**2-22)+chain[i+1,4:124]
-        
-        p1_old=exp(chain[i+1,124:244]+log(psi_old))/(1+exp(chain[i+1,124:244]+log(psi_old)))
-        p1_prop=exp(chain[i+1,124:244]+log(psi_prop))/(1+exp(chain[i+1,124:244]+log(psi_prop)))
-        
+        alpha_prop=chain[i+1,0]+np.random.normal(scale=0.001)
+
+        psi_old=np.exp(chain[i+1,0]+chain[i+1,1]*year+chain[i+1,2]*(year**2-22)+chain[i+1,4:124])
+        psi_prop=np.exp(alpha_prop+chain[i+1,1]*year+chain[i+1,2]*(year**2-22)+chain[i+1,4:124])
+
+        p1_old=np.exp(chain[i+1,124:244]+np.log(psi_old))/(1+np.exp(chain[i+1,124:244]+np.log(psi_old)))
+        p1_prop=np.exp(chain[i+1,124:244]+np.log(psi_prop))/(1+np.exp(chain[i+1,124:244]+np.log(psi_prop)))
+
         top=-alpha_prop**2/(2*10**-6)+np.sum(r1*p1_prop+(n1-r1)*(1-p1_prop))
         bottom=-chain[i+1,0]**2/(2*10**-6)+np.sum(r1*p1_old+(n1-r1)*(1-p1_old))
-        
+
         if np.random.uniform()<exp(top-bottom):
             chain[i+1,0]=alpha_prop
-    
-    
 
-        #mise à jour de Beta1
-        beta_prop=chain[i+1,0]+np.random.normal()
 
-        psi_old=chain[i+1,0]+chain[i+1,1]*year+chain[i+1,2]*(year**2-22)+chain[i+1,4:124]
-        psi_prop=chain[i+1,0]+beta_prop*year+chain[i+1,2]*(year**2-22)+chain[i+1,4:124]
+     #mise à jour de Beta1
+        beta_prop=chain[i+1,1]+np.random.normal(scale=0.001)
 
-        p1_old=exp(chain[i+1,124:244]+log(psi_old))/(1+exp(chain[i+1,124:244]+log(psi_old)))
-        p1_prop=exp(chain[i+1,124:244]+log(psi_prop))/(1+exp(chain[i+1,124:244]+log(psi_prop)))
+        psi_old=np.exp(chain[i+1,0]+chain[i+1,1]*year+chain[i+1,2]*(year**2-22)+chain[i+1,4:124])
+        psi_prop=np.exp(chain[i+1,0]+beta_prop*year+chain[i+1,2]*(year**2-22)+chain[i+1,4:124])
+
+        p1_old=np.exp(chain[i+1,124:244]+np.log(psi_old))/(1+np.exp(chain[i+1,124:244]+np.log(psi_old)))
+        p1_prop=np.exp(chain[i+1,124:244]+np.log(psi_prop))/(1+np.exp(chain[i+1,124:244]+np.log(psi_prop)))
 
         top=-beta_prop**2/(2*10**-6)+np.sum(r1*p1_prop+(n1-r1)*(1-p1_prop))
         bottom=-chain[i+1,1]**2/(2*10**-6)+np.sum(r1*p1_old+(n1-r1)*(1-p1_old))
@@ -86,47 +84,66 @@ def GibbsSampler(nchain, initialisation, data, param) :
             chain[i+1,1]=beta_prop
 
 
-      
+
         #mise à jour de Beta2
-        beta2_prop=chain[i+1,0]+np.random.normal()
+        beta2_prop=chain[i+1,2]+np.random.normal(scale=10**-3)
 
-        psi_old=chain[i+1,0]+chain[i+1,1]*year+chain[i+1,2]*(year**2-22)+chain[i+1,4:124]
-        psi_prop=chain[i+1,0]+chain[i+1,1]*year+beta2_prop*(year**2-22)+chain[i+1,4:124]
+        psi_old=np.exp(chain[i+1,0]+chain[i+1,1]*year+chain[i+1,2]*(year**2-22)+chain[i+1,4:124])
+        psi_prop=np.exp(chain[i+1,0]+chain[i+1,1]*year+beta2_prop*(year**2-22)+chain[i+1,4:124])
 
-        p1_old=exp(chain[i+1,124:244]+log(psi_old))/(1+exp(chain[i+1,124:244]+log(psi_old)))
-        p1_prop=exp(chain[i+1,124:244]+log(psi_prop))/(1+exp(chain[i+1,124:244]+log(psi_prop)))
+        p1_old=np.exp(chain[i+1,124:244]+np.log(psi_old))/(1+np.exp(chain[i+1,124:244]+np.log(psi_old)))
+        p1_prop=np.exp(chain[i+1,124:244]+np.log(psi_prop))/(1+np.exp(chain[i+1,124:244]+np.log(psi_prop)))
 
         top=-beta2_prop**2/(2*10**-6)+np.sum(r1*p1_prop+(n1-r1)*(1-p1_prop))
         bottom=-chain[i+1,2]**2/(2*10**-6)+np.sum(r1*p1_old+(n1-r1)*(1-p1_old))
 
         if np.random.uniform()<exp(top-bottom):
             chain[i+1,2]=beta2_prop
-    
-    #mise à jour de Tau
-        chain[i+1,3]=gamma.rvs(a=10**-3+60,scale=1/(10**-3+np.sum(chain[i+1,4:124])/2))
-        
-    
+
+     #mise à jour de Tau
+        chain[i+1,3]=gamma.rvs(a=10**-3+60,scale=1/(10**-3+np.sum(chain[i+1,4:124]**2)/2))
+
+
      #mise à jour des b_i
         for j in range(4,124):
-            
-            bj_prop=chain[i+1,j]+np.random.normal()
-            
-            psi_old=exp(chain[i+1,0]+chain[i+1,1]*year[j]+chain[i+1,2]*(year[j]**2-22)+chain[i+1,j])
+
+            bj_prop=chain[i+1,j]+np.random.normal(scale=0.001)
+
+            psi_old=exp(chain[i+1,0]+chain[i+1,1]*year[j-4]+chain[i+1,2]*(year[j-4]**2-22)+chain[i+1,j])
             p1j_old=exp(chain[i+1,j+120]+log(psi_old))/(1+exp(chain[i+1,j+120]+log(psi_old)))
-            
-            psi_prop=exp(chain[i+1,0]+chain[i+1,1]*year[j]+chain[i+1,2]*(year[j]**2-22)+bj_prop)
+
+            psi_prop=exp(chain[i+1,0]+chain[i+1,1]*year[j-4]+chain[i+1,2]*(year[j-4]**2-22)+bj_prop)
             p1j_prop=exp(chain[i+1,j+120]+log(psi_prop))/(1+exp(chain[i+1,j+120]+log(psi_prop)))
-            
-            top=-chain[i+1,3]*bj_prop**2/2+r1[j]*p1j_prop+(n1[j]-r1[j])*(1-p1j_prop)
-            bottom=-chain[i+1,3]*chain[i+1,j]**2/2+r1[j]*p1j_old+(n1[j]-r1[j])*(1-p1j_old)
-            
+
+            top=-chain[i+1,3]*bj_prop**2/2+r1[j-4]*p1j_prop+(n1[j-4]-r1[j-4])*(1-p1j_prop)
+            bottom=-chain[i+1,3]*chain[i+1,j]**2/2+r1[j-4]*p1j_old+(n1[j-4]-r1[j-4])*(1-p1j_old)
+
             if np.random.uniform()<exp(top-bottom):
                 chain[i+1,j]=bj_prop
-    
-    
-     #mise à jour de sigma
-  
-  return(chain)
+
+     #mise à jour des sigma_i
+
+        for j in range(124,244):
+
+            muj_prop=chain[i+1,j]+np.random.normal(scale=0.001)
+
+            psij=exp(chain[i+1,0]+chain[i+1,1]*year[j-124]+chain[i+1,2]*(year[j-124]**2-22)+chain[i+1,j-120])
+
+            p1j_prop=exp(muj_prop+log(psij))/(1+exp(muj_prop+log(psij)))
+            p1j_old=exp(chain[i+1,j]+log(psij))/(1+exp(chain[i+1,j]+log(psij)))
+
+            p0j_prop=exp(muj_prop)/(1+exp(muj_prop))
+            p0j_old=exp(chain[i+1,j])/(1+exp(chain[i+1,j]))
+
+            top=-muj_prop**2/(2*10**-6)+r0[j-124]*p0j_prop+(n0[j-124]-r0[j-124])*(1-p0j_prop)+r1[j-124]*p1j_prop+(n1[j-124]-r1[j-124])*(1-p1j_prop)
+            bottom=-chain[i+1,j]**2/(2*10**-6)+r0[j-124]*p0j_old+(n0[j-124]-r0[j-124])*(1-p0j_old)+r1[j-124]*p1j_old+(n1[j-124]-r1[j-124])*(1-p1j_old)
+
+            if np.random.uniform()<exp(top-bottom):
+                chain[i+1,j]=muj_prop
+
+return(chain)
+
+
 
 
 
