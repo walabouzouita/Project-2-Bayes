@@ -50,15 +50,17 @@ def GibbsSampler(nchain, initialisation, data, param) :
     
     
     for i in range(nchain):
-      
+        
+        chain[i+1]=chain[i]
+        
      #mise à jour de alpha
-        alpha_prop=chain[i,0]+np.random.normal()
+        alpha_prop=chain[i+1,0]+np.random.normal()
         
-        psi_old=chain[i,0]+chain[i,1]*year+chain[i,2]*(year**2-22)+chain[4:124]
-        psi_prop=alpha_prop+chain[i,1]*year+chain[i,2]*(year**2-22)+chain[4:124]
+        psi_old=chain[i+1,0]+chain[i+1,1]*year+chain[i+1,2]*(year**2-22)+chain[i+1,4:124]
+        psi_prop=alpha_prop+chain[i+1,1]*year+chain[i+1,2]*(year**2-22)+chain[i+1,4:124]
         
-        p1_old=exp(chain[124:244]+log(psi_old))/(1+exp(chain[124:244]+log(psi_old)))
-        p1_prop=exp(chain[124:244]+log(psi_prop))/(1+exp(chain[124:244]+log(psi_prop)))
+        p1_old=exp(chain[i+1,124:244]+log(psi_old))/(1+exp(chain[i+1,124:244]+log(psi_old)))
+        p1_prop=exp(chain[i+1,124:244]+log(psi_prop))/(1+exp(chain[i+1,124:244]+log(psi_prop)))
         
         top=-alpha_prop**2/(2*10**-6)+np.sum(r1*p1_prop+(n1-r1)*(1-p1_prop))
         bottom=-chain[i,0]**2/(2*10**-6)+np.sum(r1*p1_old+(n1-r1)*(1-p1_old))
