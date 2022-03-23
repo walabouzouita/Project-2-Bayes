@@ -87,7 +87,20 @@ def GibbsSampler(nchain, initialisation, data, param) :
 
 
       
-     #mise à jour de Beta2
+        #mise à jour de Beta2
+        beta2_prop=chain[i+1,0]+np.random.normal()
+
+        psi_old=chain[i+1,0]+chain[i+1,1]*year+chain[i+1,2]*(year**2-22)+chain[i+1,4:124]
+        psi_prop=chain[i+1,0]+chain[i+1,1]*year+beta2_prop*(year**2-22)+chain[i+1,4:124]
+
+        p1_old=exp(chain[i+1,124:244]+log(psi_old))/(1+exp(chain[i+1,124:244]+log(psi_old)))
+        p1_prop=exp(chain[i+1,124:244]+log(psi_prop))/(1+exp(chain[i+1,124:244]+log(psi_prop)))
+
+        top=-beta2_prop**2/(2*10**-6)+np.sum(r1*p1_prop+(n1-r1)*(1-p1_prop))
+        bottom=-chain[i+1,2]**2/(2*10**-6)+np.sum(r1*p1_old+(n1-r1)*(1-p1_old))
+
+        if np.random.uniform()<exp(top-bottom):
+            chain[i+1,2]=beta2_prop
     
     #mise à jour de Tau
         chain[i+1,3]=gamma.rvs(a=10**-3+60,scale=1/(10**-3+np.sum(chain[i+1,4:124])/2))
