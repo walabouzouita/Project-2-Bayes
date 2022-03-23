@@ -69,9 +69,23 @@ def GibbsSampler(nchain, initialisation, data, param) :
             chain[i+1,0]=alpha_prop
     
     
-     #mise à jour de Beta1
-      
-      
+
+        #mise à jour de Beta1
+        beta_prop=chain[i+1,0]+np.random.normal()
+
+        psi_old=chain[i+1,0]+chain[i+1,1]*year+chain[i+1,2]*(year**2-22)+chain[i+1,4:124]
+        psi_prop=chain[i+1,0]+beta_prop*year+chain[i+1,2]*(year**2-22)+chain[i+1,4:124]
+
+        p1_old=exp(chain[i+1,124:244]+log(psi_old))/(1+exp(chain[i+1,124:244]+log(psi_old)))
+        p1_prop=exp(chain[i+1,124:244]+log(psi_prop))/(1+exp(chain[i+1,124:244]+log(psi_prop)))
+
+        top=-beta_prop**2/(2*10**-6)+np.sum(r1*p1_prop+(n1-r1)*(1-p1_prop))
+        bottom=-chain[i+1,1]**2/(2*10**-6)+np.sum(r1*p1_old+(n1-r1)*(1-p1_old))
+
+        if np.random.uniform()<exp(top-bottom):
+            chain[i+1,1]=beta_prop
+
+
       
      #mise à jour de Beta2
     
