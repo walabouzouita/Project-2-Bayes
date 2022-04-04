@@ -122,7 +122,7 @@ def GibbsSampler(nchain, initialisation) :
             if np.random.uniform()<exp(top-bottom):
                 chain[i+1,j]=bj_prop
 
-     #mise à jour des sigma_i
+     #mise à jour des mu_i
 
         for j in range(124,244):
 
